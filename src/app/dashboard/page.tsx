@@ -46,11 +46,14 @@ const mockProposals: RentalProposal[] = [
     property: {
       id: 'prop-123',
       address: 'Av. Providencia 1234, Las Condes',
+      value_clp: 95000000,
       value_uf: 2500,
       market_rent_clp: 850000,
       size_m2: 85,
       bedrooms: 2,
-      bathrooms: 2
+      bathrooms: 2,
+      parking_spaces: 1,
+      storage_units: 1
     },
     analysis: {} as any, // Simplificado para el mock
     status: 'published',
@@ -62,11 +65,14 @@ const mockProposals: RentalProposal[] = [
     property: {
       id: 'prop-456',
       address: 'Calle Los Leones 567, Providencia',
+      value_clp: 118400000,
       value_uf: 3200,
       market_rent_clp: 950000,
       size_m2: 95,
       bedrooms: 3,
-      bathrooms: 2
+      bathrooms: 2,
+      parking_spaces: 1,
+      storage_units: 0
     },
     analysis: {} as any,
     status: 'published',
@@ -78,11 +84,14 @@ const mockProposals: RentalProposal[] = [
     property: {
       id: 'prop-789',
       address: 'Av. Apoquindo 890, Las Condes',
+      value_clp: 74000000,
       value_uf: 2000,
       market_rent_clp: 750000,
       size_m2: 75,
       bedrooms: 2,
-      bathrooms: 1
+      bathrooms: 1,
+      parking_spaces: 0,
+      storage_units: 0
     },
     analysis: {} as any,
     status: 'published',
