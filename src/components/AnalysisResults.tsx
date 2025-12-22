@@ -52,8 +52,13 @@ export default function AnalysisResults({
               <p className="font-medium">{analysis.property.address}</p>
             </div>
             <div className="space-y-2">
-              <p className="text-sm text-gray-600">Valor UF</p>
-              <p className="font-medium">{analysis.property.value_uf.toLocaleString()} UF</p>
+              <p className="text-sm text-gray-600">Valor de la propiedad</p>
+              <p className="font-medium">
+                {analysis.property.value_uf 
+                  ? `${analysis.property.value_uf.toLocaleString()} UF` 
+                  : formatCurrency(analysis.property.value_clp)
+                }
+              </p>
             </div>
             <div className="space-y-2">
               <p className="text-sm text-gray-600">Metros Cuadrados</p>
