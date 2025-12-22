@@ -111,7 +111,10 @@ export class RentalPDFGenerator {
     this.addTitle('RESUMEN DE LA PROPIEDAD', 14)
     
     this.addKeyValue('Dirección', analysis.property.address)
-    this.addKeyValue('Valor UF', `${analysis.property.value_uf.toLocaleString()} UF`)
+    if (analysis.property.value_uf) {
+      this.addKeyValue('Valor UF', `${analysis.property.value_uf.toLocaleString()} UF`)
+    }
+    this.addKeyValue('Valor CLP', `$${analysis.property.value_clp.toLocaleString()} CLP`)
     
     if (analysis.property.size_m2) {
       this.addKeyValue('Superficie', `${analysis.property.size_m2} m²`)

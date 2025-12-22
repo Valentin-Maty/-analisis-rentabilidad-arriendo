@@ -66,8 +66,13 @@ export default function AnalysisResultsImproved({
             
             <div className="text-center p-4 bg-gradient-to-r from-green-50 to-blue-50 rounded-xl border-2 border-green-100">
               <div className="text-3xl mb-2">💎</div>
-              <div className="text-sm text-gray-600 mb-1">Valor UF</div>
-              <div className="font-bold text-gray-900 text-lg">{analysis.property.value_uf.toLocaleString()} UF</div>
+              <div className="text-sm text-gray-600 mb-1">Valor de la propiedad</div>
+              <div className="font-bold text-gray-900 text-lg">
+                {analysis.property.value_uf 
+                  ? `${analysis.property.value_uf.toLocaleString()} UF` 
+                  : formatCurrency(analysis.property.value_clp)
+                }
+              </div>
             </div>
             
             <div className="text-center p-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl border-2 border-purple-100">
