@@ -154,9 +154,13 @@ export default function DashboardPage() {
 
   const handleApplyPriceReduction = (alertId: string) => {
     // En producción, esto haría una llamada a la API
-    const alert = alerts.find(a => a.id === alertId)
-    if (alert) {
-      alert(`¿Aplicar reducción de precio a ${formatCurrency(alert.suggested_new_rent)}?`)
+    const priceAlert = alerts.find(a => a.id === alertId)
+    if (priceAlert) {
+      const confirmed = window.confirm(`¿Aplicar reducción de precio a ${formatCurrency(priceAlert.suggested_new_rent)}?`)
+      if (confirmed) {
+        // Aquí se aplicaría la reducción de precio
+        handleDismissAlert(alertId)
+      }
     }
   }
 
