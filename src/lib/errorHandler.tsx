@@ -341,9 +341,9 @@ export function handleExternalServiceError(
   userMessage?: string
 ): void {
   const defaultMessage = `El servicio ${serviceName} no está disponible en este momento. Por favor, intente más tarde.`
-  handleError(error, ErrorType.EXTERNAL_SERVICE, ErrorSeverity.MEDIUM, userMessage || defaultMessage, {
-    action: 'EXTERNAL_SERVICE',
-    details: { service: serviceName }
+  const errorMsg = error instanceof Error ? `${error.message} (Servicio: ${serviceName})` : `${error} (Servicio: ${serviceName})`
+  handleError(errorMsg, ErrorType.EXTERNAL_SERVICE, ErrorSeverity.MEDIUM, userMessage || defaultMessage, {
+    action: 'EXTERNAL_SERVICE'
   })
 }
 
@@ -379,9 +379,9 @@ export function createErrorBoundary() {
     }
 
     componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-      handleError(error, ErrorType.UNKNOWN, ErrorSeverity.HIGH, 'Error en la aplicación', {
-        component: 'ErrorBoundary',
-        details: { errorInfo }
+      const errorMsg = `${error.message}\nComponentStack: ${errorInfo.componentStack}`
+      handleError(errorMsg, ErrorType.UNKNOWN, ErrorSeverity.HIGH, 'Error en la aplicación', {
+        component: 'ErrorBoundary'
       })
     }
 
