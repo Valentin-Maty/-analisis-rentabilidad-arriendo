@@ -155,7 +155,7 @@ export class RentalPDFGenerator {
   private addMarketStudy(analysis: RentalAnalysis): void {
     this.addTitle('ESTUDIO DE MERCADO', 14)
     
-    this.addKeyValue('Precio promedio por m²', `$${analysis.market_study.average_rent_per_m2.toLocaleString('es-CL')}`
+    this.addKeyValue('Precio promedio por m²', `$${analysis.market_study.average_rent_per_m2.toLocaleString('es-CL')}`)
     this.addKeyValue('Rango mínimo de mercado', this.formatCurrency(analysis.market_study.market_range.min_rent_clp))
     this.addKeyValue('Rango máximo de mercado', this.formatCurrency(analysis.market_study.market_range.max_rent_clp))
     
