@@ -1,7 +1,7 @@
 // English texts for the rental profitability analysis app
-import type { Locale } from './es'
+import type { LocaleStrings } from './types'
 
-export const en: Locale = {
+export const en: LocaleStrings = {
   common: {
     loading: 'Loading...',
     save: 'Save',

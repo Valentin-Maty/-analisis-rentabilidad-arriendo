@@ -9,7 +9,7 @@ Dependencies: Locales, React Context
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
 import es from './locales/es'
 import en from './locales/en'
-import type { Locale } from './locales/es'
+import type { Locale } from './locales/types'
 
 // Tipos para el sistema i18n
 export type SupportedLocale = 'es' | 'en'

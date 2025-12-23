@@ -1,5 +1,7 @@
 // Textos en español para la aplicación de análisis de rentabilidad
-export const es = {
+import type { LocaleStrings } from './types'
+
+export const es: LocaleStrings = {
   common: {
     loading: 'Cargando...',
     save: 'Guardar',
@@ -259,7 +261,7 @@ export const es = {
     cancelAction: 'Cancelar la acción y cerrar el modal',
     confirmAction: 'Confirmar la acción y continuar'
   }
-} as const
+}
 
-export type Locale = typeof es
+export type Locale = LocaleStrings
 export default es
