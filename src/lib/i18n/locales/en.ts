@@ -265,6 +265,37 @@ export const en: LocaleStrings = {
     infoIcon: 'Information icon',
     cancelAction: 'Cancel action and close modal',
     confirmAction: 'Confirm action and continue'
+  },
+
+  errors: {
+    generic: 'An error occurred',
+    validation: 'Validation error',
+    network: 'Network error',
+    server: 'Server error',
+    notFound: 'Not found',
+    unauthorized: 'Unauthorized',
+    forbidden: 'Forbidden'
+  },
+
+  units: {
+    m2: 'sqm',
+    uf: 'UF',
+    clp: 'CLP',
+    usd: 'USD',
+    percent: '%',
+    years: 'years',
+    months: 'months',
+    days: 'days'
+  },
+
+  status: {
+    active: 'Active',
+    inactive: 'Inactive',
+    pending: 'Pending',
+    approved: 'Approved',
+    rejected: 'Rejected',
+    draft: 'Draft',
+    published: 'Published'
   }
 } as const
 

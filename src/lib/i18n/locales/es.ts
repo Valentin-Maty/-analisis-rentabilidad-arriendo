@@ -263,6 +263,37 @@ export const es: LocaleStrings = {
     infoIcon: 'Icono de información',
     cancelAction: 'Cancelar la acción y cerrar el modal',
     confirmAction: 'Confirmar la acción y continuar'
+  },
+
+  errors: {
+    generic: 'Ha ocurrido un error',
+    validation: 'Error de validación',
+    network: 'Error de red',
+    server: 'Error del servidor',
+    notFound: 'No encontrado',
+    unauthorized: 'No autorizado',
+    forbidden: 'Prohibido'
+  },
+
+  units: {
+    m2: 'm²',
+    uf: 'UF',
+    clp: 'CLP',
+    usd: 'USD',
+    percent: '%',
+    years: 'años',
+    months: 'meses',
+    days: 'días'
+  },
+
+  status: {
+    active: 'Activo',
+    inactive: 'Inactivo',
+    pending: 'Pendiente',
+    approved: 'Aprobado',
+    rejected: 'Rechazado',
+    draft: 'Borrador',
+    published: 'Publicado'
   }
 }
 
