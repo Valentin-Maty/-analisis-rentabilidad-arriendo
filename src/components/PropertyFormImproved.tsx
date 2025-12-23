@@ -8,7 +8,7 @@ import { useRouter } from 'next/navigation'
 import PropitalSync from './PropitalSync'
 import { transformToFormData, type PropitalProperty } from '@/lib/propitalIntegration'
 import { toast } from '@/components/ui/Toast'
-import { useConfirm } from '@/components/ui/Modal'
+// import { useConfirm } from '@/components/ui/Modal' // Comentado para evitar conflicto con confirm global
 import HelpButton from '@/components/ui/HelpButton'
 import ProgressBar from '@/components/ui/ProgressBar'
 import LiveFeedback from '@/components/ui/LiveFeedback'
