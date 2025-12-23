@@ -30,9 +30,14 @@ export const es: LocaleStrings = {
   navigation: {
     home: 'Inicio',
     analysis: 'Análisis',
+    analyses: 'Análisis',
     properties: 'Propiedades',
     reports: 'Reportes',
     settings: 'Configuración',
+    profile: 'Perfil',
+    logout: 'Cerrar Sesión',
+    newAnalysis: 'Nuevo Análisis',
+    savedAnalyses: 'Análisis Guardados',
     help: 'Ayuda'
   },
 
@@ -94,8 +99,6 @@ export const es: LocaleStrings = {
 
   analysis: {
     title: 'Análisis',
-    newAnalysis: 'Nuevo análisis',
-    savedAnalyses: 'Análisis guardados',
     analysisPreview: 'Vista previa del análisis',
     commercialProposal: 'Propuesta comercial',
     executiveSummary: 'Resumen ejecutivo',

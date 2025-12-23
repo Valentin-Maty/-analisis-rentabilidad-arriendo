@@ -30,9 +30,14 @@ export const en: LocaleStrings = {
   navigation: {
     home: 'Home',
     analysis: 'Analysis',
+    analyses: 'Analyses',
     properties: 'Properties',
     reports: 'Reports',
     settings: 'Settings',
+    profile: 'Profile',
+    logout: 'Logout',
+    newAnalysis: 'New Analysis',
+    savedAnalyses: 'Saved Analyses',
     help: 'Help'
   },
 

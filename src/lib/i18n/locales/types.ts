@@ -29,6 +29,8 @@ export interface LocaleStrings {
     home: string
     analysis: string
     analyses: string
+    properties: string
+    reports: string
     settings: string
     profile: string
     logout: string
