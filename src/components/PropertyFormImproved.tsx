@@ -3,6 +3,10 @@
 import { UseFormReturn } from 'react-hook-form'
 import { useState } from 'react'
 import type { RentalAnalysisForm } from '@/types/rental'
+import { SavedAnalysisFormData, formDataToSavedAnalysis } from '@/types/saved-analysis'
+import { useRouter } from 'next/navigation'
+import PropitalSync from './PropitalSync'
+import { transformToFormData, type PropitalProperty } from '@/lib/propitalIntegration'
 
 interface PropertyFormImprovedProps {
   form: UseFormReturn<RentalAnalysisForm>
@@ -15,7 +19,11 @@ export default function PropertyFormImproved({ form, formValues, onSuggestRent }
   const [activeSection, setActiveSection] = useState(1)
   const [sending, setSending] = useState(false)
   const [showUF, setShowUF] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const [showSaveDialog, setShowSaveDialog] = useState(false)
+  const [analysisTitle, setAnalysisTitle] = useState('')
   const ufValue = parseFloat(formValues.uf_value_clp || '38000')
+  const router = useRouter()
 
   const sections = [
     { id: 1, title: '🏠 Información de la Propiedad', icon: '🏠' },
@@ -46,6 +54,108 @@ export default function PropertyFormImproved({ form, formValues, onSuggestRent }
       default:
         return false
     }
+  }
+
+  // Función para guardar el análisis
+  const saveAnalysis = async () => {
+    if (!analysisTitle.trim()) {
+      alert('Por favor ingresa un título para el análisis')
+      return
+    }
+
+    setSaving(true)
+    try {
+      const savedAnalysisData: SavedAnalysisFormData = {
+        title: analysisTitle.trim(),
+        property_address: formValues.property_address,
+        property_value_clp: formValues.property_value_clp,
+        property_value_uf: formValues.property_value_uf,
+        property_size_m2: formValues.property_size_m2,
+        bedrooms: formValues.bedrooms,
+        bathrooms: formValues.bathrooms,
+        parking_spaces: formValues.parking_spaces,
+        storage_units: formValues.storage_units,
+        suggested_rent_clp: formValues.suggested_rent_clp,
+        suggested_rent_uf: formValues.suggested_rent_uf,
+        rent_currency: formValues.rent_currency,
+        capture_price_clp: formValues.capture_price_clp,
+        capture_price_uf: formValues.capture_price_uf,
+        capture_price_currency: formValues.capture_price_currency,
+        comparable_1_address: formValues.comparable_1_address,
+        comparable_1_m2: formValues.comparable_1_m2,
+        comparable_1_bedrooms: formValues.comparable_1_bedrooms,
+        comparable_1_bathrooms: formValues.comparable_1_bathrooms,
+        comparable_1_parking: formValues.comparable_1_parking,
+        comparable_1_storage: formValues.comparable_1_storage,
+        comparable_1_price: formValues.comparable_1_price,
+        comparable_2_address: formValues.comparable_2_address,
+        comparable_2_m2: formValues.comparable_2_m2,
+        comparable_2_bedrooms: formValues.comparable_2_bedrooms,
+        comparable_2_bathrooms: formValues.comparable_2_bathrooms,
+        comparable_2_parking: formValues.comparable_2_parking,
+        comparable_2_storage: formValues.comparable_2_storage,
+        comparable_2_price: formValues.comparable_2_price,
+        comparable_3_address: formValues.comparable_3_address,
+        comparable_3_m2: formValues.comparable_3_m2,
+        comparable_3_bedrooms: formValues.comparable_3_bedrooms,
+        comparable_3_bathrooms: formValues.comparable_3_bathrooms,
+        comparable_3_parking: formValues.comparable_3_parking,
+        comparable_3_storage: formValues.comparable_3_storage,
+        comparable_3_price: formValues.comparable_3_price,
+        annual_maintenance_clp: formValues.annual_maintenance_clp || '0',
+        annual_property_tax_clp: formValues.annual_property_tax_clp || '0',
+        annual_insurance_clp: formValues.annual_insurance_clp || '0',
+        uf_value_clp: formValues.uf_value_clp,
+        broker_email: 'corredor@ejemplo.com', // En una app real, esto vendría del usuario autenticado
+        notes: `Análisis creado desde el formulario el ${new Date().toLocaleString('es-CL')}`,
+        tags: ['formulario', 'nuevo']
+      }
+
+      const response = await fetch('/api/analyses', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(savedAnalysisData),
+      })
+
+      const result = await response.json()
+
+      if (response.ok) {
+        alert('✅ Análisis guardado exitosamente')
+        setShowSaveDialog(false)
+        setAnalysisTitle('')
+        
+        // Preguntar si quiere ir a la lista de análisis
+        if (confirm('¿Quieres ir a la lista de análisis guardados?')) {
+          router.push('/analyses')
+        }
+      } else {
+        alert(`❌ Error al guardar: ${result.error}`)
+      }
+    } catch (error) {
+      console.error('Error saving analysis:', error)
+      alert('❌ Error al guardar el análisis')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const canSaveAnalysis = () => {
+    return !!(formValues.property_address && formValues.property_value_clp && formValues.property_size_m2)
+  }
+
+  const handlePropitalPropertySelect = (property: PropitalProperty) => {
+    const formData = transformToFormData(property)
+    
+    // Cargar datos de la propiedad en el formulario
+    Object.entries(formData).forEach(([key, value]) => {
+      if (value) {
+        setValue(key as keyof RentalAnalysisForm, value)
+      }
+    })
+    
+    alert(`✅ Propiedad cargada desde Propital: ${property.address}`)
   }
 
   return (
@@ -103,6 +213,12 @@ export default function PropertyFormImproved({ form, formValues, onSuggestRent }
                 <h3 className="text-2xl font-bold text-gray-900 mb-2">🏠 Información de la Propiedad</h3>
                 <p className="text-gray-600">Datos básicos para el análisis de rentabilidad</p>
               </div>
+
+              {/* Integración con Propital */}
+              <PropitalSync 
+                onPropertySelect={handlePropitalPropertySelect}
+                brokerId="broker-default"
+              />
 
               <div className="space-y-4">
                 <div>
@@ -298,7 +414,15 @@ export default function PropertyFormImproved({ form, formValues, onSuggestRent }
                 </div>
               </div>
 
-              <div className="flex justify-end pt-4">
+              <div className="flex justify-between pt-4">
+                <button
+                  type="button"
+                  onClick={() => setShowSaveDialog(true)}
+                  className="btn btn-success"
+                  disabled={!canSaveAnalysis()}
+                >
+                  💾 Guardar Análisis
+                </button>
                 <button
                   type="button"
                   onClick={() => setActiveSection(2)}
@@ -687,14 +811,24 @@ export default function PropertyFormImproved({ form, formValues, onSuggestRent }
                 >
                   ← Datos Básicos
                 </button>
-                <button
-                  type="button"
-                  onClick={() => setActiveSection(3)}
-                  className="btn btn-primary"
-                  disabled={!isComplete(2)}
-                >
-                  Siguiente: Configuración →
-                </button>
+                <div className="flex space-x-2">
+                  <button
+                    type="button"
+                    onClick={() => setShowSaveDialog(true)}
+                    className="btn btn-success"
+                    disabled={!canSaveAnalysis()}
+                  >
+                    💾 Guardar
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setActiveSection(3)}
+                    className="btn btn-primary"
+                    disabled={!isComplete(2)}
+                  >
+                    Siguiente: Configuración →
+                  </button>
+                </div>
               </div>
             </div>
           )}
@@ -820,18 +954,90 @@ export default function PropertyFormImproved({ form, formValues, onSuggestRent }
                 >
                   ← Análisis de Precio
                 </button>
-                <button
-                  type="button"
-                  onClick={() => setActiveSection(1)}
-                  className="btn btn-success"
-                >
-                  ✅ Completar Configuración
-                </button>
+                <div className="flex space-x-2">
+                  <button
+                    type="button"
+                    onClick={() => setShowSaveDialog(true)}
+                    className="btn btn-success"
+                    disabled={!canSaveAnalysis()}
+                  >
+                    💾 Guardar Análisis
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setActiveSection(1)}
+                    className="btn btn-primary"
+                  >
+                    ✅ Completar
+                  </button>
+                </div>
               </div>
             </div>
           )}
         </div>
       </div>
+
+      {/* Dialog para guardar análisis */}
+      {showSaveDialog && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-md mx-4">
+            <div className="text-center mb-4">
+              <div className="text-3xl mb-2">💾</div>
+              <h3 className="text-xl font-bold text-gray-900 mb-1">Guardar Análisis</h3>
+              <p className="text-gray-600 text-sm">Dale un nombre a tu análisis para encontrarlo fácilmente</p>
+            </div>
+
+            <div className="mb-6">
+              <label className="label">✏️ Título del análisis *</label>
+              <input
+                type="text"
+                value={analysisTitle}
+                onChange={(e) => setAnalysisTitle(e.target.value)}
+                className="input w-full"
+                placeholder={`Análisis - ${formValues.property_address?.slice(0, 30) || 'Nueva Propiedad'}...`}
+                maxLength={100}
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                Ejemplo: "Departamento Las Condes - Av. Providencia" o "Casa Providencia - Análisis Marzo"
+              </p>
+            </div>
+
+            <div className="bg-gray-50 rounded-lg p-3 mb-4 text-sm">
+              <h4 className="font-semibold text-gray-900 mb-2">🏠 Resumen del análisis:</h4>
+              <div className="space-y-1 text-gray-600">
+                <div>📍 {formValues.property_address || 'Sin dirección'}</div>
+                <div>💰 Valor: ${parseFloat(formValues.property_value_clp || '0').toLocaleString('es-CL')} CLP</div>
+                <div>📐 {formValues.property_size_m2 || '0'}m² • {formValues.bedrooms || '0'}D/{formValues.bathrooms || '0'}B</div>
+                {formValues.suggested_rent_clp && (
+                  <div>🏠 Arriendo sugerido: ${parseFloat(formValues.suggested_rent_clp).toLocaleString('es-CL')} CLP</div>
+                )}
+              </div>
+            </div>
+
+            <div className="flex space-x-3">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowSaveDialog(false)
+                  setAnalysisTitle('')
+                }}
+                className="btn btn-secondary flex-1"
+                disabled={saving}
+              >
+                ❌ Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={saveAnalysis}
+                className="btn btn-success flex-1"
+                disabled={saving || !analysisTitle.trim()}
+              >
+                {saving ? '⏳ Guardando...' : '💾 Guardar'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

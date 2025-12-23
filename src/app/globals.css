@@ -269,4 +269,16 @@
     border: 5px solid transparent;
     border-top-color: #2d3748;
   }
+
+  .input-sm {
+    padding: 8px 12px;
+    font-size: 13px;
+  }
+
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
 }
