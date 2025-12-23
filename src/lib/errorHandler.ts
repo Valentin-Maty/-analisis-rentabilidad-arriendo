@@ -4,6 +4,8 @@ Responsibility: Manejo centralizado de errores y logging
 Dependencies: Configuración, notificaciones
 */
 
+import React from 'react'
+
 export enum ErrorType {
   VALIDATION = 'VALIDATION',
   NETWORK = 'NETWORK',
