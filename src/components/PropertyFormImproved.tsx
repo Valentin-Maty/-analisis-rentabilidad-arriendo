@@ -30,6 +30,7 @@ export default function PropertyFormImproved({ form, formValues, onSuggestRent }
   const [analysisTitle, setAnalysisTitle] = useState('')
   const ufValue = parseFloat(formValues.uf_value_clp || '38000')
   const router = useRouter()
+  // useConfirm removed - using native confirm instead
 
   const sections = [
     { id: 1, title: 'Información de la Propiedad', icon: '🏠' },

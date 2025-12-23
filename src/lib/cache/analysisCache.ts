@@ -47,11 +47,15 @@ class AnalysisCache {
   // Limpiar entradas expiradas
   private cleanupExpired(): void {
     const now = Date.now()
-    for (const [key, entry] of this.cache.entries()) {
+    const keysToDelete: string[] = []
+    
+    this.cache.forEach((entry, key) => {
       if (this.isExpired(entry)) {
-        this.cache.delete(key)
+        keysToDelete.push(key)
       }
-    }
+    })
+    
+    keysToDelete.forEach(key => this.cache.delete(key))
     this.updateStats()
   }
 
@@ -67,12 +71,12 @@ class AnalysisCache {
       let oldestKey = ''
       let oldestTime = Date.now()
       
-      for (const [key, entry] of this.cache.entries()) {
+      this.cache.forEach((entry, key) => {
         if (entry.timestamp < oldestTime) {
           oldestTime = entry.timestamp
           oldestKey = key
         }
-      }
+      })
       
       if (oldestKey) {
         this.cache.delete(oldestKey)
@@ -163,11 +167,15 @@ class AnalysisCache {
 
   // Invalidar todas las listas
   invalidateLists(): void {
-    for (const [key, _] of this.cache.entries()) {
+    const keysToDelete: string[] = []
+    
+    this.cache.forEach((_, key) => {
       if (key.startsWith('list:')) {
-        this.cache.delete(key)
+        keysToDelete.push(key)
       }
-    }
+    })
+    
+    keysToDelete.forEach(key => this.cache.delete(key))
     this.updateStats()
   }
 
