@@ -260,13 +260,14 @@ export class RentalPDFGenerator {
     this.addFooter()
     
     // Retornar el PDF como array de bytes
-    return this.pdf.output('arraybuffer') as Uint8Array
+    const arrayBuffer = this.pdf.output('arraybuffer')
+    return new Uint8Array(arrayBuffer)
   }
 
   public downloadPDF(options: PDFOptions, filename?: string): void {
     this.generatePDF(options)
     
-    const defaultFilename = `analisis-arriendo-${analysis.property.address.replace(/\s+/g, '-')}-${new Date().toISOString().split('T')[0]}.pdf`
+    const defaultFilename = `analisis-arriendo-${options.analysis.property.address.replace(/\s+/g, '-')}-${new Date().toISOString().split('T')[0]}.pdf`
     
     this.pdf.save(filename || defaultFilename)
   }
