@@ -389,7 +389,9 @@ export default function AnalysisPreview({ formValues }: AnalysisPreviewProps) {
                         <span>Ingreso promedio esperado:</span>
                         <span className="font-bold">${Math.round(baseRent * 0.975).toLocaleString('es-CL')}</span>
                       </div>
-                      <div className="text-xs text-green-600 mt-1">✅ Arriendo rápido en 12 días = 99.6% de rentabilidad anual conservada</div>
+                      <div className="text-xs text-green-600 mt-1">✅ Arriendo rápido en 7-12 días = 99.6% de rentabilidad anual conservada</div>
+                      <div className="text-xs text-green-700 mt-1 font-semibold">💰 Ahorro: El propietario conserva 18-23 días de renta vs. esperar 30 días</div>
+                      <div className="text-xs text-green-600 mt-1">📈 Ganancia adicional: ${Math.round(baseRent * 0.975 * 0.6).toLocaleString('es-CL')} por arriendo rápido</div>
                     </div>
                     <div className="bg-white bg-opacity-60 p-3 rounded">
                       <div className="text-green-700 font-medium">✅ Ventajas:</div>
@@ -447,7 +449,9 @@ export default function AnalysisPreview({ formValues }: AnalysisPreviewProps) {
                         <span>Ingreso promedio esperado:</span>
                         <span className="font-bold">${Math.round(baseRent * 0.97).toLocaleString('es-CL')}</span>
                       </div>
-                      <div className="text-xs text-orange-600 mt-1">🌟 Arriendo en 15 días = 99.5% de rentabilidad anual conservada</div>
+                      <div className="text-xs text-orange-600 mt-1">🌟 Arriendo en 12-15 días = 99.5% de rentabilidad anual conservada</div>
+                      <div className="text-xs text-orange-700 mt-1 font-semibold">💰 Ahorro: El propietario conserva 15 días de renta vs. esperar 30 días</div>
+                      <div className="text-xs text-orange-600 mt-1">📈 Ganancia adicional: ${Math.round(baseRent * 0.5).toLocaleString('es-CL')} por arriendo en medio mes</div>
                     </div>
                     <div className="bg-white bg-opacity-60 p-3 rounded">
                       <div className="text-orange-700 font-medium">⚡ Ventajas:</div>
@@ -505,7 +509,9 @@ export default function AnalysisPreview({ formValues }: AnalysisPreviewProps) {
                         <span>Ingreso promedio esperado:</span>
                         <span className="font-bold">${Math.round(baseRent * 0.985).toLocaleString('es-CL')}</span>
                       </div>
-                      <div className="text-xs text-blue-600 mt-1">🔵 Arriendo en 20 días = 99.33% de rentabilidad anual conservada</div>
+                      <div className="text-xs text-blue-600 mt-1">🔵 Arriendo en 15-20 días = 99.33% de rentabilidad anual conservada</div>
+                      <div className="text-xs text-blue-700 mt-1 font-semibold">💰 Ahorro: El propietario conserva 10 días de renta vs. esperar 30 días</div>
+                      <div className="text-xs text-blue-600 mt-1">📈 Ganancia adicional: ${Math.round(baseRent * 0.33).toLocaleString('es-CL')} por no extenderse a 30 días</div>
                     </div>
                     <div className="bg-white bg-opacity-60 p-3 rounded">
                       <div className="text-blue-700 font-medium">🎯 Ventajas:</div>
@@ -761,18 +767,6 @@ export default function AnalysisPreview({ formValues }: AnalysisPreviewProps) {
         </button>
       </div>
 
-      
-      {/* Información del flujo */}
-      <div className="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
-        <h4 className="font-bold text-blue-900 mb-2">📋 Flujo de Aceptación</h4>
-        <div className="text-sm text-blue-800 space-y-1">
-          <p><strong>1.</strong> 📧 Se envía PDF al cliente para firma</p>
-          <p><strong>2.</strong> 🔔 Notificación automática al equipo comercial</p>
-          <p><strong>3.</strong> ✍️ Cliente firma y acepta el plan comercial</p>
-          <p><strong>4.</strong> 🚀 Se autoriza la publicación de la propiedad</p>
-          <p><strong>5.</strong> ⏰ Comienzan a correr los 30 días del plan</p>
-        </div>
-      </div>
     </div>
   )
 }
