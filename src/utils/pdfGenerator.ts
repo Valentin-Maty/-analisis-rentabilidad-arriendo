@@ -39,7 +39,7 @@ export class RentalPDFGenerator {
   private addTitle(text: string, fontSize: number = 16): void {
     this.checkPageBreak(20)
     this.pdf.setFontSize(fontSize)
-    this.pdf.setFont(undefined, 'bold')
+    this.pdf.setFont('helvetica', 'bold')
     this.pdf.text(text, this.margin, this.currentY)
     this.currentY += fontSize + 5
   }
@@ -47,7 +47,7 @@ export class RentalPDFGenerator {
   private addSubtitle(text: string, fontSize: number = 12): void {
     this.checkPageBreak(15)
     this.pdf.setFontSize(fontSize)
-    this.pdf.setFont(undefined, 'normal')
+    this.pdf.setFont('helvetica', 'normal')
     this.pdf.text(text, this.margin, this.currentY)
     this.currentY += fontSize + 3
   }
@@ -55,7 +55,7 @@ export class RentalPDFGenerator {
   private addText(text: string, fontSize: number = 10, indent: number = 0): void {
     this.checkPageBreak(12)
     this.pdf.setFontSize(fontSize)
-    this.pdf.setFont(undefined, 'normal')
+    this.pdf.setFont('helvetica', 'normal')
     this.pdf.text(text, this.margin + indent, this.currentY)
     this.currentY += fontSize + 2
   }
@@ -63,9 +63,9 @@ export class RentalPDFGenerator {
   private addKeyValue(key: string, value: string, fontSize: number = 10): void {
     this.checkPageBreak(12)
     this.pdf.setFontSize(fontSize)
-    this.pdf.setFont(undefined, 'normal')
+    this.pdf.setFont('helvetica', 'normal')
     this.pdf.text(key + ':', this.margin, this.currentY)
-    this.pdf.setFont(undefined, 'bold')
+    this.pdf.setFont('helvetica', 'bold')
     this.pdf.text(value, this.margin + 80, this.currentY)
     this.currentY += fontSize + 2
   }
@@ -90,7 +90,7 @@ export class RentalPDFGenerator {
     
     this.pdf.setTextColor(255, 255, 255)
     this.pdf.setFontSize(18)
-    this.pdf.setFont(undefined, 'bold')
+    this.pdf.setFont('helvetica', 'bold')
     this.pdf.text('ANÁLISIS DE RENTABILIDAD - ARRIENDOS', this.margin + 5, this.margin + 20)
     
     this.currentY = this.margin + 40

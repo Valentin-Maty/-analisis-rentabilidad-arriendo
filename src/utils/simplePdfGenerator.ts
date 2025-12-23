@@ -40,9 +40,9 @@ export const generateSimpleRentalPDF = (options: SimplePDFOptions & { rentCurren
       doc.setTextColor(color[0], color[1], color[2])
       doc.setFontSize(fontSize)
       if (isBold) {
-        doc.setFont(undefined, 'bold')
+        doc.setFont('helvetica', 'bold')
       } else {
-        doc.setFont(undefined, 'normal')
+        doc.setFont('helvetica', 'normal')
       }
       
       doc.text(text, margin, yPosition)
