@@ -46,6 +46,7 @@ export interface LocaleStrings {
   currency: Record<string, any>
   dates: Record<string, any>
   location: Record<string, string>
+  signature: Record<string, string>
   plans: Record<string, string>
   errors: Record<string, string>
   messages: Record<string, string>
