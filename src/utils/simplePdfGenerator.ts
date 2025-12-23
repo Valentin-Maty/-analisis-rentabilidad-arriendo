@@ -191,7 +191,7 @@ export const generateSimpleRentalPDF = (options: SimplePDFOptions & { rentCurren
     addText('Firma: _____________________', 11)
     
     // Footer
-    const pageCount = doc.internal.getNumberOfPages()
+    const pageCount = (doc as any).internal.pages.length - 1 // jsPDF stores pages starting from index 1
     for (let i = 1; i <= pageCount; i++) {
       doc.setPage(i)
       doc.setFontSize(8)
