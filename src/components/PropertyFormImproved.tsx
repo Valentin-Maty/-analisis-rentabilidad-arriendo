@@ -30,7 +30,6 @@ export default function PropertyFormImproved({ form, formValues, onSuggestRent }
   const [analysisTitle, setAnalysisTitle] = useState('')
   const ufValue = parseFloat(formValues.uf_value_clp || '38000')
   const router = useRouter()
-  const { confirm, ConfirmModalComponent } = useConfirm()
 
   const sections = [
     { id: 1, title: 'Información de la Propiedad', icon: '🏠' },
@@ -1275,7 +1274,6 @@ export default function PropertyFormImproved({ form, formValues, onSuggestRent }
         </div>
       )}
       
-      <ConfirmModalComponent />
     </div>
   )
 }
