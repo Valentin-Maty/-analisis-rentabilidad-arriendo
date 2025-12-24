@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { SavedAnalysis, AnalysisFilters, AnalysisListResponse, SavedAnalysisFormData, formDataToSavedAnalysis } from '@/types/saved-analysis';
 import { getAllAnalyses, saveAnalysis } from '@/lib/analysisStore';
+import { AnalysisStorage } from '@/lib/localStorage';
 import { validatePagination, validateRentalAnalysis, ValidationResult } from '@/lib/validation';
 import { handleApiError } from '@/lib/errorHandler';
 

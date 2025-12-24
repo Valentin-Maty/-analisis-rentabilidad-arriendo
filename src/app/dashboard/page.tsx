@@ -1,119 +1,35 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import type { PriceAlert, RentalProposal } from '@/types/rental'
-
-// Datos simulados (en producción vendrían de una API)
-const mockAlerts: PriceAlert[] = [
-  {
-    id: 'alert-1',
-    property_id: 'prop-123',
-    current_rent: 850000,
-    suggested_new_rent: 807500,
-    reason: 'low_visits',
-    days_since_publication: 15,
-    visits_count: 2,
-    applications_count: 0,
-    created_at: new Date()
-  },
-  {
-    id: 'alert-2',
-    property_id: 'prop-456',
-    current_rent: 950000,
-    suggested_new_rent: 903000,
-    reason: 'no_applications',
-    days_since_publication: 20,
-    visits_count: 8,
-    applications_count: 0,
-    created_at: new Date()
-  },
-  {
-    id: 'alert-3',
-    property_id: 'prop-789',
-    current_rent: 750000,
-    suggested_new_rent: 712500,
-    reason: 'time_based',
-    days_since_publication: 25,
-    visits_count: 5,
-    applications_count: 1,
-    created_at: new Date()
-  }
-]
-
-const mockProposals: RentalProposal[] = [
-  {
-    id: 'proposal-1',
-    property: {
-      id: 'prop-123',
-      address: 'Av. Providencia 1234, Las Condes',
-      value_clp: 95000000,
-      value_uf: 2500,
-      market_rent_clp: 850000,
-      size_m2: 85,
-      bedrooms: 2,
-      bathrooms: 2,
-      parking_spaces: 1,
-      storage_units: 1
-    },
-    analysis: {} as any, // Simplificado para el mock
-    status: 'published',
-    created_at: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000), // 15 días atrás
-    expires_at: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000) // 15 días adelante
-  },
-  {
-    id: 'proposal-2',
-    property: {
-      id: 'prop-456',
-      address: 'Calle Los Leones 567, Providencia',
-      value_clp: 118400000,
-      value_uf: 3200,
-      market_rent_clp: 950000,
-      size_m2: 95,
-      bedrooms: 3,
-      bathrooms: 2,
-      parking_spaces: 1,
-      storage_units: 0
-    },
-    analysis: {} as any,
-    status: 'published',
-    created_at: new Date(Date.now() - 20 * 24 * 60 * 60 * 1000),
-    expires_at: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000)
-  },
-  {
-    id: 'proposal-3',
-    property: {
-      id: 'prop-789',
-      address: 'Av. Apoquindo 890, Las Condes',
-      value_clp: 74000000,
-      value_uf: 2000,
-      market_rent_clp: 750000,
-      size_m2: 75,
-      bedrooms: 2,
-      bathrooms: 1,
-      parking_spaces: 0,
-      storage_units: 0
-    },
-    analysis: {} as any,
-    status: 'published',
-    created_at: new Date(Date.now() - 25 * 24 * 60 * 60 * 1000),
-    expires_at: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000)
-  }
-]
+import Link from 'next/link'
+import { AnalysisStorage, type DashboardData, type DashboardActivity } from '@/lib/localStorage'
+import { SavedAnalysis } from '@/types/saved-analysis'
 
 export default function DashboardPage() {
-  const [alerts, setAlerts] = useState<PriceAlert[]>([])
-  const [proposals, setProposals] = useState<RentalProposal[]>([])
+  const [dashboardData, setDashboardData] = useState<DashboardData | null>(null)
+  const [analyses, setAnalyses] = useState<SavedAnalysis[]>([])
   const [loading, setLoading] = useState(true)
-  const [filter, setFilter] = useState<'all' | 'urgent' | 'moderate' | 'low'>('all')
+  const [filter, setFilter] = useState<'all' | 'recent' | 'active' | 'draft'>('all')
 
   useEffect(() => {
-    // Simular carga de datos
-    setTimeout(() => {
-      setAlerts(mockAlerts)
-      setProposals(mockProposals)
-      setLoading(false)
-    }, 1000)
+    loadDashboardData()
   }, [])
+
+  const loadDashboardData = () => {
+    setLoading(true)
+    try {
+      // Cargar datos del dashboard desde localStorage
+      const data = AnalysisStorage.getDashboardData()
+      const allAnalyses = AnalysisStorage.getAll()
+      
+      setDashboardData(data)
+      setAnalyses(allAnalyses)
+    } catch (error) {
+      console.error('Error loading dashboard data:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('es-CL', {
@@ -123,306 +39,306 @@ export default function DashboardPage() {
     }).format(amount)
   }
 
-  const getAlertSeverity = (alert: PriceAlert): 'urgent' | 'moderate' | 'low' => {
-    if (alert.days_since_publication >= 25 || alert.visits_count <= 2) return 'urgent'
-    if (alert.days_since_publication >= 15 || alert.visits_count <= 5) return 'moderate'
-    return 'low'
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('es-CL', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    })
   }
 
-  const getAlertColor = (severity: 'urgent' | 'moderate' | 'low') => {
-    switch (severity) {
-      case 'urgent': return 'bg-error-50 border-error-200 text-error-800'
-      case 'moderate': return 'bg-warning-50 border-warning-200 text-warning-800'
-      case 'low': return 'bg-blue-50 border-blue-200 text-blue-800'
+  const getStatusColor = (status: SavedAnalysis['metadata']['status']) => {
+    switch (status) {
+      case 'draft': return 'bg-gray-100 text-gray-800'
+      case 'sent_to_client': return 'bg-blue-100 text-blue-800'
+      case 'client_responded': return 'bg-yellow-100 text-yellow-800'
+      case 'published': return 'bg-green-100 text-green-800'
+      case 'archived': return 'bg-red-100 text-red-800'
+      default: return 'bg-gray-100 text-gray-800'
     }
   }
 
-  const getReasonText = (reason: string) => {
-    switch (reason) {
-      case 'low_visits': return 'Pocas visitas'
-      case 'no_applications': return 'Sin postulaciones'
-      case 'time_based': return 'Tiempo en publicación'
-      case 'market_change': return 'Cambio de mercado'
-      default: return reason
+  const getStatusLabel = (status: SavedAnalysis['metadata']['status']) => {
+    switch (status) {
+      case 'draft': return 'Borrador'
+      case 'sent_to_client': return 'Enviado'
+      case 'client_responded': return 'Respondido'
+      case 'published': return 'Publicado'
+      case 'archived': return 'Archivado'
+      default: return status
     }
   }
 
-  const filteredAlerts = alerts.filter(alert => {
+  const getActivityIcon = (type: DashboardActivity['type']) => {
+    switch (type) {
+      case 'analysis_created': return '📝'
+      case 'rental_sent': return '📨'
+      case 'client_response': return '💬'
+      case 'price_updated': return '💰'
+      default: return '📊'
+    }
+  }
+
+  const filteredAnalyses = analyses.filter(analysis => {
     if (filter === 'all') return true
-    return getAlertSeverity(alert) === filter
-  })
-
-  const handleApplyPriceReduction = (alertId: string) => {
-    // En producción, esto haría una llamada a la API
-    const priceAlert = alerts.find(a => a.id === alertId)
-    if (priceAlert) {
-      const confirmed = window.confirm(`¿Aplicar reducción de precio a ${formatCurrency(priceAlert.suggested_new_rent)}?`)
-      if (confirmed) {
-        // Aquí se aplicaría la reducción de precio
-        handleDismissAlert(alertId)
-      }
+    if (filter === 'recent') {
+      const dayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000)
+      return new Date(analysis.metadata.created_at) > dayAgo
     }
-  }
-
-  const handleDismissAlert = (alertId: string) => {
-    setAlerts(prev => prev.filter(a => a.id !== alertId))
-  }
+    if (filter === 'active') return ['sent_to_client', 'published', 'client_responded'].includes(analysis.metadata.status)
+    if (filter === 'draft') return analysis.metadata.status === 'draft'
+    return true
+  })
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Cargando dashboard...</p>
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 p-4">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex justify-center items-center h-64">
+            <div className="text-xl text-gray-600">⏳ Cargando dashboard...</div>
+          </div>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8 space-y-8">
-      {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold text-gray-900">Dashboard de Arriendos</h1>
-        <p className="text-gray-600 mt-2">
-          Monitoreo de propiedades publicadas y alertas de ajuste de precios
-        </p>
-      </div>
-
-      {/* Estadísticas Rápidas */}
-      <div className="grid lg:grid-cols-4 gap-6">
-        <div className="metric-card">
-          <div className="metric-value text-error-600">{alerts.filter(a => getAlertSeverity(a) === 'urgent').length}</div>
-          <div className="metric-label">Alertas Urgentes</div>
-        </div>
-        <div className="metric-card">
-          <div className="metric-value text-warning-600">{alerts.filter(a => getAlertSeverity(a) === 'moderate').length}</div>
-          <div className="metric-label">Alertas Moderadas</div>
-        </div>
-        <div className="metric-card">
-          <div className="metric-value text-primary-600">{proposals.filter(p => p.status === 'published').length}</div>
-          <div className="metric-label">Propiedades Publicadas</div>
-        </div>
-        <div className="metric-card">
-          <div className="metric-value text-success-600">
-            {proposals.filter(p => new Date() > new Date(p.expires_at)).length}
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 p-4">
+      <div className="max-w-7xl mx-auto space-y-6">
+        {/* Encabezado */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">📊 Dashboard</h1>
+            <p className="text-gray-600 mt-1">Resumen de tu actividad de análisis de rentabilidad</p>
           </div>
-          <div className="metric-label">Próximas a Vencer</div>
+          <Link 
+            href="/analisis-precio" 
+            className="btn btn-primary flex items-center space-x-2"
+          >
+            <span>🧮</span>
+            <span>Calculadora de Arriendo</span>
+          </Link>
         </div>
-      </div>
 
-      {/* Filtros */}
-      <div className="card">
-        <div className="card-body">
-          <div className="flex flex-wrap gap-4 items-center">
-            <span className="font-medium text-gray-900">Filtrar alertas:</span>
-            <div className="flex space-x-2">
-              <button
-                onClick={() => setFilter('all')}
-                className={`btn ${filter === 'all' ? 'btn-primary' : 'btn-secondary'}`}
-              >
-                Todas ({alerts.length})
-              </button>
-              <button
-                onClick={() => setFilter('urgent')}
-                className={`btn ${filter === 'urgent' ? 'bg-error-600 text-white' : 'btn-secondary'}`}
-              >
-                Urgentes ({alerts.filter(a => getAlertSeverity(a) === 'urgent').length})
-              </button>
-              <button
-                onClick={() => setFilter('moderate')}
-                className={`btn ${filter === 'moderate' ? 'bg-warning-600 text-white' : 'btn-secondary'}`}
-              >
-                Moderadas ({alerts.filter(a => getAlertSeverity(a) === 'moderate').length})
-              </button>
-              <button
-                onClick={() => setFilter('low')}
-                className={`btn ${filter === 'low' ? 'bg-blue-600 text-white' : 'btn-secondary'}`}
-              >
-                Información ({alerts.filter(a => getAlertSeverity(a) === 'low').length})
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Alertas */}
-      <div className="space-y-6">
-        <h2 className="text-2xl font-bold text-gray-900">Alertas de Ajuste de Precio</h2>
-        
-        {filteredAlerts.length === 0 ? (
+        {/* Métricas principales */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <div className="card">
-            <div className="card-body text-center py-12">
-              <div className="text-gray-400 mb-4">
-                <svg className="w-16 h-16 mx-auto" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                </svg>
-              </div>
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No hay alertas</h3>
-              <p className="text-gray-600">No hay alertas de ajuste de precio para mostrar en este momento.</p>
+            <div className="card-body text-center">
+              <div className="text-3xl font-bold text-blue-600">{dashboardData?.totalAnalyses || 0}</div>
+              <div className="text-gray-600 text-sm mt-1">Total Análisis</div>
             </div>
           </div>
-        ) : (
-          <div className="space-y-4">
-            {filteredAlerts.map((alert) => {
-              const severity = getAlertSeverity(alert)
-              const proposal = proposals.find(p => p.property.id === alert.property_id)
-              
-              return (
-                <div key={alert.id} className={`card border-2 ${getAlertColor(severity)}`}>
-                  <div className="card-body">
-                    <div className="flex justify-between items-start mb-4">
-                      <div className="flex-1">
-                        <h3 className="text-lg font-semibold mb-2">
-                          {proposal?.property.address || `Propiedad ${alert.property_id}`}
-                        </h3>
-                        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
-                          <div>
-                            <span className="text-gray-600">Precio actual:</span>
-                            <div className="font-medium">{formatCurrency(alert.current_rent)}</div>
-                          </div>
-                          <div>
-                            <span className="text-gray-600">Precio sugerido:</span>
-                            <div className="font-medium text-primary-600">
-                              {formatCurrency(alert.suggested_new_rent)}
-                            </div>
-                          </div>
-                          <div>
-                            <span className="text-gray-600">Días publicada:</span>
-                            <div className="font-medium">{alert.days_since_publication} días</div>
-                          </div>
-                          <div>
-                            <span className="text-gray-600">Visitas:</span>
-                            <div className="font-medium">{alert.visits_count} visitas</div>
-                          </div>
+          
+          <div className="card">
+            <div className="card-body text-center">
+              <div className="text-3xl font-bold text-green-600">{dashboardData?.activeRentals || 0}</div>
+              <div className="text-gray-600 text-sm mt-1">Arriendos Activos</div>
+            </div>
+          </div>
+          
+          <div className="card">
+            <div className="card-body text-center">
+              <div className="text-3xl font-bold text-purple-600">
+                {dashboardData?.averageRentability ? `${dashboardData.averageRentability.toFixed(1)}%` : '0%'}
+              </div>
+              <div className="text-gray-600 text-sm mt-1">Rentabilidad Promedio</div>
+            </div>
+          </div>
+          
+          <div className="card">
+            <div className="card-body text-center">
+              <div className="text-3xl font-bold text-orange-600">
+                {analyses.filter(a => a.metadata.status === 'draft').length}
+              </div>
+              <div className="text-gray-600 text-sm mt-1">Borradores</div>
+            </div>
+          </div>
+        </div>
+
+        {/* Filtros */}
+        <div className="card">
+          <div className="card-body">
+            <div className="flex flex-wrap gap-4 items-center">
+              <span className="font-medium text-gray-900">Filtrar análisis:</span>
+              <div className="flex space-x-2">
+                <button
+                  onClick={() => setFilter('all')}
+                  className={`btn ${filter === 'all' ? 'btn-primary' : 'btn-secondary'}`}
+                >
+                  Todos ({analyses.length})
+                </button>
+                <button
+                  onClick={() => setFilter('recent')}
+                  className={`btn ${filter === 'recent' ? 'btn-primary' : 'btn-secondary'}`}
+                >
+                  Recientes ({analyses.filter(a => {
+                    const dayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000)
+                    return new Date(a.metadata.created_at) > dayAgo
+                  }).length})
+                </button>
+                <button
+                  onClick={() => setFilter('active')}
+                  className={`btn ${filter === 'active' ? 'btn-primary' : 'btn-secondary'}`}
+                >
+                  Activos ({dashboardData?.activeRentals || 0})
+                </button>
+                <button
+                  onClick={() => setFilter('draft')}
+                  className={`btn ${filter === 'draft' ? 'btn-primary' : 'btn-secondary'}`}
+                >
+                  Borradores ({analyses.filter(a => a.metadata.status === 'draft').length})
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Lista de análisis */}
+          <div className="space-y-6">
+            <h2 className="text-2xl font-bold text-gray-900">Análisis Recientes</h2>
+            
+            {filteredAnalyses.length === 0 ? (
+              <div className="card">
+                <div className="card-body text-center py-12">
+                  <div className="text-6xl mb-4">📂</div>
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">No hay análisis</h3>
+                  <p className="text-gray-600 mb-6">
+                    {filter === 'all' 
+                      ? 'Aún no has creado ningún análisis de rentabilidad.' 
+                      : `No hay análisis en la categoría "${filter}".`
+                    }
+                  </p>
+                  <Link href="/analisis-precio" className="btn btn-primary">
+                    🧮 Crear Primer Análisis
+                  </Link>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {filteredAnalyses.slice(0, 5).map((analysis) => (
+                  <div key={analysis.id} className="card hover:shadow-lg transition-shadow">
+                    <div className="card-body">
+                      <div className="flex justify-between items-start mb-3">
+                        <div className="flex-1">
+                          <h3 className="font-bold text-gray-900 mb-1 line-clamp-1">
+                            {analysis.title}
+                          </h3>
+                          <p className="text-sm text-gray-600 line-clamp-1">
+                            📍 {analysis.property.address}
+                          </p>
                         </div>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                          severity === 'urgent' ? 'bg-error-100 text-error-800' :
-                          severity === 'moderate' ? 'bg-warning-100 text-warning-800' :
-                          'bg-blue-100 text-blue-800'
-                        }`}>
-                          {severity === 'urgent' ? 'URGENTE' : 
-                           severity === 'moderate' ? 'MODERADA' : 'INFORMACIÓN'}
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(analysis.metadata.status)}`}>
+                          {getStatusLabel(analysis.metadata.status)}
                         </span>
                       </div>
-                    </div>
 
-                    <div className="flex flex-wrap items-center justify-between gap-4">
-                      <div className="flex items-center space-x-4 text-sm">
+                      <div className="grid grid-cols-2 gap-4 text-sm mb-3">
                         <div>
-                          <span className="text-gray-600">Motivo:</span>
-                          <span className="ml-2 font-medium">{getReasonText(alert.reason)}</span>
+                          <span className="text-gray-600">💰 Valor:</span>
+                          <div className="font-medium">{formatCurrency(analysis.property.value_clp)}</div>
                         </div>
                         <div>
-                          <span className="text-gray-600">Postulaciones:</span>
-                          <span className="ml-2 font-medium">{alert.applications_count}</span>
-                        </div>
-                        <div>
-                          <span className="text-gray-600">Reducción:</span>
-                          <span className="ml-2 font-medium">
-                            -{((alert.current_rent - alert.suggested_new_rent) / alert.current_rent * 100).toFixed(1)}%
-                          </span>
+                          <span className="text-gray-600">🏠 Arriendo:</span>
+                          <div className="font-medium text-green-600">
+                            {formatCurrency(analysis.analysis.suggested_rent_clp || 0)}
+                          </div>
                         </div>
                       </div>
-                      
-                      <div className="flex space-x-3">
-                        <button
-                          onClick={() => handleDismissAlert(alert.id)}
-                          className="btn btn-secondary text-sm py-2 px-4"
+
+                      <div className="flex justify-between items-center pt-3 border-t border-gray-200">
+                        <span className="text-xs text-gray-500">
+                          {formatDate(analysis.metadata.updated_at)}
+                        </span>
+                        <Link 
+                          href={`/analisis-precio?id=${analysis.id}`}
+                          className="btn btn-primary btn-sm"
                         >
-                          Ignorar
-                        </button>
-                        <button
-                          onClick={() => handleApplyPriceReduction(alert.id)}
-                          className="btn btn-primary text-sm py-2 px-4"
-                        >
-                          Aplicar Reducción
-                        </button>
+                          👁️ Ver
+                        </Link>
                       </div>
                     </div>
                   </div>
-                </div>
-              )
-            })}
-          </div>
-        )}
-      </div>
+                ))}
 
-      {/* Propiedades Publicadas */}
-      <div className="space-y-6">
-        <h2 className="text-2xl font-bold text-gray-900">Propiedades Publicadas</h2>
-        
-        <div className="card">
-          <div className="card-body overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Propiedad
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Precio Actual
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Días Publicada
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Estado
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Vence en
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Acciones
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {proposals.map((proposal) => {
-                  const daysPublished = Math.floor((Date.now() - proposal.created_at.getTime()) / (1000 * 60 * 60 * 24))
-                  const daysUntilExpiry = Math.ceil((proposal.expires_at.getTime() - Date.now()) / (1000 * 60 * 60 * 24))
-                  const hasAlert = alerts.some(a => a.property_id === proposal.property.id)
-                  
-                  return (
-                    <tr key={proposal.id} className={hasAlert ? 'bg-warning-50' : ''}>
-                      <td className="px-4 py-4">
-                        <div>
-                          <div className="font-medium text-gray-900">{proposal.property.address}</div>
-                          <div className="text-sm text-gray-500">
-                            {proposal.property.size_m2}m² • {proposal.property.bedrooms}d • {proposal.property.bathrooms}b
-                          </div>
+                {filteredAnalyses.length > 5 && (
+                  <div className="text-center">
+                    <Link href="/analyses" className="btn btn-secondary">
+                      Ver todos los análisis ({filteredAnalyses.length})
+                    </Link>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Actividad reciente */}
+          <div className="space-y-6">
+            <h2 className="text-2xl font-bold text-gray-900">Actividad Reciente</h2>
+            
+            {!dashboardData?.recentActivity || dashboardData.recentActivity.length === 0 ? (
+              <div className="card">
+                <div className="card-body text-center py-12">
+                  <div className="text-4xl mb-4">📈</div>
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">Sin actividad reciente</h3>
+                  <p className="text-gray-600">La actividad aparecerá aquí cuando realices acciones.</p>
+                </div>
+              </div>
+            ) : (
+              <div className="card">
+                <div className="card-body">
+                  <div className="space-y-3">
+                    {dashboardData.recentActivity.slice(0, 10).map((activity) => (
+                      <div key={activity.id} className="flex items-start space-x-3 p-3 rounded-lg hover:bg-gray-50 transition-colors">
+                        <span className="text-2xl">{getActivityIcon(activity.type)}</span>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium text-gray-900">{activity.title}</p>
+                          <p className="text-sm text-gray-600 truncate">{activity.description}</p>
+                          {activity.property_address && (
+                            <p className="text-xs text-gray-500 mt-1">📍 {activity.property_address}</p>
+                          )}
+                          <p className="text-xs text-gray-400 mt-1">{formatDate(activity.date)}</p>
                         </div>
-                      </td>
-                      <td className="px-4 py-4 text-sm font-medium">
-                        {formatCurrency(proposal.property.market_rent_clp)}
-                      </td>
-                      <td className="px-4 py-4 text-sm">
-                        {daysPublished} días
-                      </td>
-                      <td className="px-4 py-4">
-                        <span className={`px-2 py-1 text-xs rounded-full ${
-                          hasAlert ? 'bg-warning-100 text-warning-800' : 'bg-success-100 text-success-800'
-                        }`}>
-                          {hasAlert ? 'Con Alerta' : 'Normal'}
-                        </span>
-                      </td>
-                      <td className="px-4 py-4 text-sm">
-                        <span className={daysUntilExpiry <= 5 ? 'text-error-600 font-medium' : ''}>
-                          {daysUntilExpiry > 0 ? `${daysUntilExpiry} días` : 'Vencida'}
-                        </span>
-                      </td>
-                      <td className="px-4 py-4 text-sm">
-                        <button className="btn btn-secondary text-xs py-1 px-3">
-                          Ver Detalles
-                        </button>
-                      </td>
-                    </tr>
-                  )
-                })}
-              </tbody>
-            </table>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Acciones rápidas */}
+        <div className="card">
+          <div className="card-body">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Acciones Rápidas</h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <Link 
+                href="/analisis-precio" 
+                className="btn btn-primary flex items-center justify-center space-x-2 p-4"
+              >
+                <span>🧮</span>
+                <span>Nuevo Análisis</span>
+              </Link>
+              
+              <Link 
+                href="/analyses" 
+                className="btn btn-secondary flex items-center justify-center space-x-2 p-4"
+              >
+                <span>📂</span>
+                <span>Ver Todos los Análisis</span>
+              </Link>
+              
+              <button 
+                onClick={loadDashboardData}
+                className="btn btn-secondary flex items-center justify-center space-x-2 p-4"
+              >
+                <span>🔄</span>
+                <span>Actualizar Dashboard</span>
+              </button>
+            </div>
           </div>
         </div>
       </div>

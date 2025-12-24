@@ -1,18 +1,19 @@
-// Simulación de almacenamiento para análisis
-// En producción esto debería ser reemplazado por una base de datos real
+// Sistema de almacenamiento de análisis usando localStorage
+// Proporciona persistencia real de datos para la aplicación
 
 import { SavedAnalysis } from '@/types/saved-analysis';
 import analysisCache from '@/lib/cache/analysisCache';
+import { AnalysisStorage } from '@/lib/localStorage';
 
-// Store en memoria para desarrollo
-let analyses: SavedAnalysis[] = [];
-
-// Inicializar con datos de ejemplo
-function initializeStore() {
-  if (analyses.length === 0) {
+// Migrar datos de ejemplo si no existen datos en localStorage
+function initializeWithExampleData() {
+  const existingAnalyses = AnalysisStorage.getAll();
+  
+  // Solo crear datos de ejemplo si no hay análisis guardados
+  if (existingAnalyses.length === 0) {
     const exampleAnalyses: SavedAnalysis[] = [
       {
-        id: '1',
+        id: AnalysisStorage.generateId(),
         title: 'Departamento Las Condes - Av. Providencia',
         property: {
           address: 'Av. Providencia 123, Las Condes, Santiago',
@@ -55,7 +56,7 @@ function initializeStore() {
         },
       },
       {
-        id: '2',
+        id: AnalysisStorage.generateId(),
         title: 'Casa Providencia - Zona Residencial',
         property: {
           address: 'Calle Los Leones 456, Providencia, Santiago',
@@ -94,7 +95,11 @@ function initializeStore() {
         },
       },
     ];
-    analyses = exampleAnalyses;
+
+    // Guardar datos de ejemplo en localStorage
+    exampleAnalyses.forEach(analysis => {
+      AnalysisStorage.save(analysis);
+    });
   }
 }
 
@@ -105,8 +110,11 @@ export function getAllAnalyses(): SavedAnalysis[] {
     return cached;
   }
   
-  initializeStore();
-  const result = [...analyses];
+  // Inicializar con datos de ejemplo si es necesario
+  initializeWithExampleData();
+  
+  // Obtener datos reales del localStorage
+  const result = AnalysisStorage.getAll();
   
   // Guardar en cache por 5 minutos
   analysisCache.setList({}, result);
@@ -120,61 +128,109 @@ export function getAnalysisById(id: string): SavedAnalysis | undefined {
     return cached;
   }
   
-  initializeStore();
-  const result = analyses.find(analysis => analysis.id === id);
+  // Obtener del localStorage
+  const result = AnalysisStorage.getById(id);
   
   // Si se encuentra, guardarlo en cache
   if (result) {
     analysisCache.set(id, result);
   }
   
-  return result;
+  return result || undefined;
 }
 
 export function saveAnalysis(analysis: SavedAnalysis): SavedAnalysis {
-  initializeStore();
-  const existingIndex = analyses.findIndex(a => a.id === analysis.id);
+  // Guardar en localStorage
+  const success = AnalysisStorage.save(analysis);
   
-  if (existingIndex >= 0) {
-    analyses[existingIndex] = analysis;
+  if (success) {
+    // Actualizar cache
+    analysisCache.set(analysis.id, analysis);
+    // Invalidar listas para forzar recarga
+    analysisCache.invalidateLists();
+    
+    // Agregar actividad al dashboard
+    AnalysisStorage.addDashboardActivity({
+      id: `save_${Date.now()}`,
+      type: 'analysis_created',
+      title: 'Análisis guardado',
+      description: `"${analysis.title}" guardado exitosamente`,
+      date: new Date().toISOString(),
+      property_address: analysis.property.address
+    });
+    
+    return analysis;
   } else {
-    analyses.push(analysis);
+    throw new Error('Error al guardar el análisis');
   }
-  
-  // Actualizar cache
-  analysisCache.set(analysis.id, analysis);
-  // Invalidar listas para forzar recarga
-  analysisCache.invalidateLists();
-  
-  return analysis;
 }
 
 export function deleteAnalysis(id: string): boolean {
-  initializeStore();
-  const index = analyses.findIndex(analysis => analysis.id === id);
+  // Obtener el análisis antes de eliminarlo para logs
+  const analysis = AnalysisStorage.getById(id);
   
-  if (index >= 0) {
-    analyses.splice(index, 1);
+  // Eliminar del localStorage
+  const success = AnalysisStorage.delete(id);
+  
+  if (success) {
     // Invalidar cache
     analysisCache.invalidate(id);
-    return true;
+    analysisCache.invalidateLists();
+    
+    // Agregar actividad al dashboard
+    if (analysis) {
+      AnalysisStorage.addDashboardActivity({
+        id: `delete_${Date.now()}`,
+        type: 'analysis_created', // No hay tipo específico para delete, usar genérico
+        title: 'Análisis eliminado',
+        description: `"${analysis.title}" fue eliminado`,
+        date: new Date().toISOString(),
+        property_address: analysis.property.address
+      });
+    }
   }
   
-  return false;
+  return success;
 }
 
 export function updateAnalysis(id: string, updates: Partial<SavedAnalysis>): SavedAnalysis | null {
-  initializeStore();
-  const index = analyses.findIndex(analysis => analysis.id === id);
+  const existingAnalysis = AnalysisStorage.getById(id);
   
-  if (index >= 0) {
-    analyses[index] = { ...analyses[index], ...updates };
-    // Actualizar cache
-    analysisCache.set(id, analyses[index]);
-    // Invalidar listas para forzar recarga
-    analysisCache.invalidateLists();
-    return analyses[index];
+  if (existingAnalysis) {
+    const updatedAnalysis: SavedAnalysis = {
+      ...existingAnalysis,
+      ...updates,
+      metadata: {
+        ...existingAnalysis.metadata,
+        ...updates.metadata,
+        updated_at: new Date().toISOString()
+      }
+    };
+    
+    const success = AnalysisStorage.save(updatedAnalysis);
+    
+    if (success) {
+      // Actualizar cache
+      analysisCache.set(id, updatedAnalysis);
+      // Invalidar listas para forzar recarga
+      analysisCache.invalidateLists();
+      
+      return updatedAnalysis;
+    }
   }
   
   return null;
+}
+
+// Función específica para actualizar el estado
+export function updateAnalysisStatus(id: string, status: SavedAnalysis['metadata']['status']): boolean {
+  const success = AnalysisStorage.updateStatus(id, status);
+  
+  if (success) {
+    // Invalidar cache
+    analysisCache.invalidate(id);
+    analysisCache.invalidateLists();
+  }
+  
+  return success;
 }
