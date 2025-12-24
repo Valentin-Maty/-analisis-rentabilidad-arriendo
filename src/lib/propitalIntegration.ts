@@ -252,42 +252,9 @@ export async function syncWithPropital(brokerId: string): Promise<{
   }
 }
 
-// Datos simulados para desarrollo
+// Datos simulados para desarrollo - vacíos por defecto
 function getMockBrokerProperties(brokerId: string): PropitalProperty[] {
-  return [
-    {
-      id: 'prop-1',
-      address: 'Av. Providencia 1234, Las Condes',
-      owner_id: 'owner-1',
-      broker_id: brokerId,
-      value_clp: 95000000,
-      value_uf: 2500,
-      size_m2: 75,
-      bedrooms: 2,
-      bathrooms: 2,
-      parking_spaces: 1,
-      storage_units: 1,
-      status: 'draft',
-      created_at: new Date('2024-01-15'),
-      updated_at: new Date('2024-01-20'),
-    },
-    {
-      id: 'prop-2',
-      address: 'Av. Las Condes 456, Las Condes',
-      owner_id: 'owner-2',
-      broker_id: brokerId,
-      value_clp: 120000000,
-      value_uf: 3200,
-      size_m2: 90,
-      bedrooms: 3,
-      bathrooms: 2,
-      parking_spaces: 2,
-      storage_units: 1,
-      status: 'published',
-      created_at: new Date('2024-01-10'),
-      updated_at: new Date('2024-01-25'),
-    },
-  ]
+  return [];
 }
 
 function getMockBrokerInfo(brokerId: string): PropitalBroker {
