@@ -20,29 +20,50 @@ export default function NewAnalysisPage() {
       storage_units: '0',
       
       suggested_rent_clp: '',
+      suggested_rent_uf: '',
       rent_currency: 'CLP',
       capture_price_clp: '',
+      capture_price_uf: '',
       capture_price_currency: 'CLP',
-      comparable_properties: [],
       
-      maintenance_clp: '',
-      property_tax_clp: '',
-      insurance_clp: '',
-      vacancy_percentage: '8.33',
+      market_study_notes: '',
       
-      plans_enabled: ['A', 'B', 'C'],
+      plan_a_commission: '50',
+      plan_b_commission: '75', 
+      plan_c_commission: '100',
       
-      broker_name: '',
-      broker_email: '',
-      broker_phone: '',
-      broker_signature: '',
+      annual_maintenance_clp: '',
+      annual_property_tax_clp: '',
+      annual_insurance_clp: '',
       
-      client_name: '',
-      client_email: '',
-      client_phone: '',
+      uf_value_clp: '38000',
       
-      notes: '',
-      tags: []
+      comparable_1_link: '',
+      comparable_1_address: '',
+      comparable_1_m2: '',
+      comparable_1_bedrooms: '',
+      comparable_1_bathrooms: '',
+      comparable_1_parking: '',
+      comparable_1_storage: '',
+      comparable_1_price: '',
+      
+      comparable_2_link: '',
+      comparable_2_address: '',
+      comparable_2_m2: '',
+      comparable_2_bedrooms: '',
+      comparable_2_bathrooms: '',
+      comparable_2_parking: '',
+      comparable_2_storage: '',
+      comparable_2_price: '',
+      
+      comparable_3_link: '',
+      comparable_3_address: '',
+      comparable_3_m2: '',
+      comparable_3_bedrooms: '',
+      comparable_3_bathrooms: '',
+      comparable_3_parking: '',
+      comparable_3_storage: '',
+      comparable_3_price: ''
     }
   })
 
@@ -79,15 +100,37 @@ export default function NewAnalysisPage() {
   }, [form])
 
   const handleSuggestRent = () => {
-    // Validar que hay comparables
-    const comparables = formValues.comparable_properties || []
+    // Construir array de comparables desde los campos individuales
+    const comparables = []
+    
+    if (formValues.comparable_1_price && formValues.comparable_1_m2) {
+      comparables.push({
+        rent_clp: parseFloat(formValues.comparable_1_price),
+        size_m2: parseFloat(formValues.comparable_1_m2)
+      })
+    }
+    
+    if (formValues.comparable_2_price && formValues.comparable_2_m2) {
+      comparables.push({
+        rent_clp: parseFloat(formValues.comparable_2_price),
+        size_m2: parseFloat(formValues.comparable_2_m2)
+      })
+    }
+    
+    if (formValues.comparable_3_price && formValues.comparable_3_m2) {
+      comparables.push({
+        rent_clp: parseFloat(formValues.comparable_3_price),
+        size_m2: parseFloat(formValues.comparable_3_m2)
+      })
+    }
+    
     if (comparables.length === 0) {
       alert('Por favor, agrega al menos una propiedad comparable')
       return
     }
 
     // Calcular precio sugerido basado en comparables
-    const avgRent = comparables.reduce((sum, c) => sum + (c.rent_clp || 0), 0) / comparables.length
+    const avgRent = comparables.reduce((sum, c) => sum + c.rent_clp, 0) / comparables.length
     form.setValue('suggested_rent_clp', Math.round(avgRent).toString())
   }
 

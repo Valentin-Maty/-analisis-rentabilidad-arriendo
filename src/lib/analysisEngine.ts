@@ -11,10 +11,10 @@ export function performAnalysis(formData: RentalAnalysisForm): RentalAnalysis {
   const propertyValue = parseFloat(formData.property_value_clp || '0')
   const suggestedRent = parseFloat(formData.suggested_rent_clp || '0')
   const capturePrice = parseFloat(formData.capture_price_clp || formData.suggested_rent_clp || '0')
-  const maintenanceCost = parseFloat(formData.maintenance_clp || '0')
-  const propertyTax = parseFloat(formData.property_tax_clp || '0')
-  const insurance = parseFloat(formData.insurance_clp || '0')
-  const vacancyRate = parseFloat(formData.vacancy_percentage || '8.33') / 100
+  const maintenanceCost = parseFloat(formData.annual_maintenance_clp || '0') / 12
+  const propertyTax = parseFloat(formData.annual_property_tax_clp || '0') / 12
+  const insurance = parseFloat(formData.annual_insurance_clp || '0') / 12
+  const vacancyRate = 0.0833 // 8.33% por defecto (1 mes de vacancia al año)
   
   // Calcular gastos anuales
   const annualMaintenance = maintenanceCost * 12
@@ -32,20 +32,70 @@ export function performAnalysis(formData: RentalAnalysisForm): RentalAnalysis {
   const grossYield = propertyValue > 0 ? ((suggestedRent * 12) / propertyValue) * 100 : 0
   const netYield = propertyValue > 0 ? (netAnnualIncome / propertyValue) * 100 : 0
   
+  // Construir array de comparables desde los campos individuales
+  const comparableProperties = []
+  
+  if (formData.comparable_1_price && formData.comparable_1_address) {
+    comparableProperties.push({
+      id: 1,
+      address: formData.comparable_1_address,
+      rent_clp: parseFloat(formData.comparable_1_price),
+      size_m2: parseFloat(formData.comparable_1_m2 || '0'),
+      bedrooms: parseInt(formData.comparable_1_bedrooms || '0'),
+      bathrooms: parseInt(formData.comparable_1_bathrooms || '0'),
+      parking_spaces: parseInt(formData.comparable_1_parking || '0'),
+      storage_units: parseInt(formData.comparable_1_storage || '0'),
+      price_per_m2: parseFloat(formData.comparable_1_m2 || '1') > 0 
+        ? parseFloat(formData.comparable_1_price || '0') / parseFloat(formData.comparable_1_m2 || '1') 
+        : 0,
+      link: formData.comparable_1_link,
+      similarity_score: 85
+    })
+  }
+  
+  if (formData.comparable_2_price && formData.comparable_2_address) {
+    comparableProperties.push({
+      id: 2,
+      address: formData.comparable_2_address,
+      rent_clp: parseFloat(formData.comparable_2_price),
+      size_m2: parseFloat(formData.comparable_2_m2 || '0'),
+      bedrooms: parseInt(formData.comparable_2_bedrooms || '0'),
+      bathrooms: parseInt(formData.comparable_2_bathrooms || '0'),
+      parking_spaces: parseInt(formData.comparable_2_parking || '0'),
+      storage_units: parseInt(formData.comparable_2_storage || '0'),
+      price_per_m2: parseFloat(formData.comparable_2_m2 || '1') > 0 
+        ? parseFloat(formData.comparable_2_price || '0') / parseFloat(formData.comparable_2_m2 || '1') 
+        : 0,
+      link: formData.comparable_2_link,
+      similarity_score: 85
+    })
+  }
+  
+  if (formData.comparable_3_price && formData.comparable_3_address) {
+    comparableProperties.push({
+      id: 3,
+      address: formData.comparable_3_address,
+      rent_clp: parseFloat(formData.comparable_3_price),
+      size_m2: parseFloat(formData.comparable_3_m2 || '0'),
+      bedrooms: parseInt(formData.comparable_3_bedrooms || '0'),
+      bathrooms: parseInt(formData.comparable_3_bathrooms || '0'),
+      parking_spaces: parseInt(formData.comparable_3_parking || '0'),
+      storage_units: parseInt(formData.comparable_3_storage || '0'),
+      price_per_m2: parseFloat(formData.comparable_3_m2 || '1') > 0 
+        ? parseFloat(formData.comparable_3_price || '0') / parseFloat(formData.comparable_3_m2 || '1') 
+        : 0,
+      link: formData.comparable_3_link,
+      similarity_score: 85
+    })
+  }
+
   // Generar planes comerciales
   const plans: RentalPlan[] = []
   
-  if (formData.plans_enabled?.includes('A')) {
-    plans.push(generatePlanA(capturePrice))
-  }
-  
-  if (formData.plans_enabled?.includes('B')) {
-    plans.push(generatePlanB(capturePrice))
-  }
-  
-  if (formData.plans_enabled?.includes('C')) {
-    plans.push(generatePlanC(capturePrice))
-  }
+  // Siempre generar los 3 planes
+  plans.push(generatePlanA(capturePrice))
+  plans.push(generatePlanB(capturePrice))
+  plans.push(generatePlanC(capturePrice))
   
   // Construir resultado del análisis
   const analysis: RentalAnalysis = {
@@ -66,84 +116,32 @@ export function performAnalysis(formData: RentalAnalysisForm): RentalAnalysis {
       average_rent_per_m2: parseFloat(formData.property_size_m2 || '0') > 0 
         ? suggestedRent / parseFloat(formData.property_size_m2 || '1')
         : 0,
-      comparable_properties: formData.comparable_properties || [],
+      comparable_properties: comparableProperties,
       market_range: {
         min_rent_clp: suggestedRent * 0.9,
         max_rent_clp: suggestedRent * 1.1
       },
       neighborhood_factors: {
         location_score: 8,
-        transport_score: 7,
-        services_score: 8,
-        security_score: 8,
-        overall_score: 7.75
+        transportation_access: 7,
+        amenities_score: 8
       }
     },
-    financial_analysis: {
-      cap_rate: capRate,
-      annual_gross_income: suggestedRent * 12,
-      annual_net_income: netAnnualIncome,
-      monthly_net_income: netAnnualIncome / 12,
-      roi_percentage: netYield,
-      payback_period_years: propertyValue > 0 && netAnnualIncome > 0 
-        ? propertyValue / netAnnualIncome 
-        : 0,
-      irr_percentage: calculateIRR(propertyValue, netAnnualIncome),
-      vacancy_impact: {
-        monthly_cost: suggestedRent * vacancyRate,
-        annual_cost: suggestedRent * vacancyRate * 12,
-        break_even_days: 30 * vacancyRate
-      }
+    cap_rate_analysis: {
+      property_value_clp: propertyValue,
+      annual_rental_income: suggestedRent * 12,
+      annual_expenses: totalAnnualExpenses,
+      net_operating_income: netAnnualIncome,
+      cap_rate_percentage: capRate,
+      comparison_to_market: capRate >= 8 ? 'above' : capRate >= 6 ? 'average' : 'below'
     },
-    expenses_breakdown: {
-      monthly: {
-        maintenance: maintenanceCost,
-        property_tax: propertyTax,
-        insurance: insurance,
-        management: 0,
-        utilities: 0,
-        other: 0,
-        total: maintenanceCost + propertyTax + insurance
-      },
-      annual: {
-        maintenance: annualMaintenance,
-        property_tax: annualPropertyTax,
-        insurance: annualInsurance,
-        management: 0,
-        utilities: 0,
-        other: 0,
-        total: totalAnnualExpenses
-      }
+    vacancy_impact: {
+      days_vacant: 30, // 1 mes promedio
+      percentage_annual_loss: vacancyRate * 100,
+      lost_income_clp: suggestedRent * vacancyRate * 12,
+      break_even_reduction_percentage: vacancyRate * 100
     },
-    sensitivity_analysis: {
-      rent_variations: [
-        { percentage_change: -10, new_cap_rate: calculateCapRateWithRentChange(propertyValue, suggestedRent * 0.9, totalAnnualExpenses, vacancyRate) },
-        { percentage_change: -5, new_cap_rate: calculateCapRateWithRentChange(propertyValue, suggestedRent * 0.95, totalAnnualExpenses, vacancyRate) },
-        { percentage_change: 0, new_cap_rate: capRate },
-        { percentage_change: 5, new_cap_rate: calculateCapRateWithRentChange(propertyValue, suggestedRent * 1.05, totalAnnualExpenses, vacancyRate) },
-        { percentage_change: 10, new_cap_rate: calculateCapRateWithRentChange(propertyValue, suggestedRent * 1.1, totalAnnualExpenses, vacancyRate) }
-      ],
-      vacancy_impact: [
-        { vacancy_rate: 0, annual_income_loss: 0 },
-        { vacancy_rate: 5, annual_income_loss: suggestedRent * 12 * 0.05 },
-        { vacancy_rate: 10, annual_income_loss: suggestedRent * 12 * 0.1 },
-        { vacancy_rate: 15, annual_income_loss: suggestedRent * 12 * 0.15 }
-      ]
-    },
-    recommendations: generateRecommendations(capRate, vacancyRate, suggestedRent),
-    broker: {
-      name: formData.broker_name || '',
-      email: formData.broker_email || '',
-      phone: formData.broker_phone || '',
-      signature: formData.broker_signature || ''
-    },
-    metadata: {
-      created_at: new Date(),
-      updated_at: new Date(),
-      version: '1.0',
-      currency: 'CLP',
-      uf_value: parseFloat(formData.uf_value_clp || '38000')
-    }
+    recommended_initial_rent: capturePrice
   }
   
   return analysis
