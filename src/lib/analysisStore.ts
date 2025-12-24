@@ -5,102 +5,10 @@ import { SavedAnalysis } from '@/types/saved-analysis';
 import analysisCache from '@/lib/cache/analysisCache';
 import { AnalysisStorage } from '@/lib/localStorage';
 
-// Migrar datos de ejemplo si no existen datos en localStorage
+// No inicializar con datos de ejemplo - empezar con aplicación vacía
 function initializeWithExampleData() {
-  const existingAnalyses = AnalysisStorage.getAll();
-  
-  // Solo crear datos de ejemplo si no hay análisis guardados
-  if (existingAnalyses.length === 0) {
-    const exampleAnalyses: SavedAnalysis[] = [
-      {
-        id: AnalysisStorage.generateId(),
-        title: 'Departamento Las Condes - Av. Providencia',
-        property: {
-          address: 'Av. Providencia 123, Las Condes, Santiago',
-          value_clp: 95000000,
-          value_uf: 2500,
-          size_m2: 75,
-          bedrooms: 2,
-          bathrooms: 2,
-          parking_spaces: 1,
-          storage_units: 1,
-        },
-        analysis: {
-          suggested_rent_clp: 850000,
-          rent_currency: 'CLP',
-          capture_price_clp: 850000,
-          capture_price_currency: 'CLP',
-          comparable_properties: [],
-          annual_expenses: {
-            maintenance_clp: 1200000,
-            property_tax_clp: 800000,
-            insurance_clp: 300000,
-          },
-          uf_value_clp: 38000,
-        },
-        calculations: {
-          cap_rate: 8.5,
-          annual_rental_yield: 10.7,
-          monthly_net_income: 658333,
-          vacancy_cost_per_month: 70833,
-          break_even_rent_reduction: 8.33,
-          plan_comparisons: [],
-        },
-        metadata: {
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-          broker_email: 'corredor@ejemplo.com',
-          status: 'draft',
-          tags: ['departamento', 'las-condes'],
-          notes: 'Análisis inicial para propiedad en excelente ubicación',
-        },
-      },
-      {
-        id: AnalysisStorage.generateId(),
-        title: 'Casa Providencia - Zona Residencial',
-        property: {
-          address: 'Calle Los Leones 456, Providencia, Santiago',
-          value_clp: 120000000,
-          size_m2: 120,
-          bedrooms: 3,
-          bathrooms: 2,
-          parking_spaces: 2,
-          storage_units: 0,
-        },
-        analysis: {
-          suggested_rent_clp: 1200000,
-          rent_currency: 'CLP',
-          comparable_properties: [],
-          annual_expenses: {
-            maintenance_clp: 1500000,
-            property_tax_clp: 1000000,
-            insurance_clp: 400000,
-          },
-          uf_value_clp: 38000,
-        },
-        calculations: {
-          cap_rate: 9.2,
-          annual_rental_yield: 12.0,
-          monthly_net_income: 958333,
-          vacancy_cost_per_month: 100000,
-          break_even_rent_reduction: 8.33,
-          plan_comparisons: [],
-        },
-        metadata: {
-          created_at: new Date(Date.now() - 86400000).toISOString(), // 1 día atrás
-          updated_at: new Date(Date.now() - 86400000).toISOString(),
-          broker_email: 'corredor@ejemplo.com',
-          status: 'sent_to_client',
-          tags: ['casa', 'providencia'],
-        },
-      },
-    ];
-
-    // Guardar datos de ejemplo en localStorage
-    exampleAnalyses.forEach(analysis => {
-      AnalysisStorage.save(analysis);
-    });
-  }
+  // No hacer nada - la aplicación empieza sin datos
+  return;
 }
 
 export function getAllAnalyses(): SavedAnalysis[] {
